@@ -76,7 +76,7 @@
 				"          producto = product,",
 				"          cantidad = qty,",
 				"          precio_unitario = unit_price,",
-				"          nombre_cliente = {customer/name},",
+				"          cliente_nombre = {customer/name},",
 				"          email_cliente = {customer/email},",
 				"          cuidad_cliente = {customer/city},",
 				"          metodo_pago = payment_method,",
