@@ -1,0 +1,71 @@
+{
+	"name": "df_venta_online_bronze_silver",
+	"properties": {
+		"folder": {
+			"name": "Bronze"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ventas_online_csv",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          timestamp as string,",
+				"          product as string,",
+				"          qty as string,",
+				"          unit_price as string,",
+				"          {customer/name} as string,",
+				"          {customer/email} as string,",
+				"          {customer/city} as string,",
+				"          payment_method as string,",
+				"          status as string,",
+				"          shipping_cost as string,",
+				"          channel as string,",
+				"          customer as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 derive(order_id = trim(order_id)) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          id_orden = order_id,",
+				"          fecha = timestamp,",
+				"          producto = product,",
+				"          cantidad = qty,",
+				"          precio_unitario = unit_price,",
+				"          nombre_cliente = {customer/name},",
+				"          email_cliente = {customer/email},",
+				"          cuidad_cliente = {customer/city},",
+				"          metodo_pago = payment_method,",
+				"          status,",
+				"          costo_envio = shipping_cost,",
+				"          canal = channel,",
+				"          cliente = customer",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive() ~> derivedColumn2"
+			]
+		}
+	}
+}
