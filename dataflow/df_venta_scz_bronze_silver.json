@@ -19,6 +19,12 @@
 			"transformations": [
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
 				}
 			],
 			"scriptLines": [
@@ -38,7 +44,10 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source1",
 				"source1 derive(vendedor = trim(vendedor),",
-				"          cliente_nombre = trim(cliente_nombre)) ~> derivedColumn1"
+				"          cliente_nombre = trim(cliente_nombre),",
+				"          producto = trim(producto)) ~> derivedColumn1",
+				"derivedColumn1 derive(producto = initCap(regexReplace(producto,'\\\\s+', ' '))) ~> derivedColumn2",
+				"derivedColumn2 derive(sucursal = iif(in(['scz','Santa Cruz','Sta Cruz','santa cruz','SANTA CRUZ','sta. Cruz','sc'],sucursal),'Santa Cruz', sucursal)) ~> derivedColumn3"
 			]
 		}
 	}
