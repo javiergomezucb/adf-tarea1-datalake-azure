@@ -31,6 +31,10 @@
 			],
 			"sinks": [
 				{
+					"dataset": {
+						"referenceName": "ventas_sc_limpia_csv",
+						"type": "DatasetReference"
+					},
 					"name": "sink1"
 				}
 			],
@@ -97,8 +101,13 @@
 				"union1, source3 union(byName: true)~> union2",
 				"union2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     partitionFileNames:['ventas_union_limpio.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
 			]
 		}
 	}
