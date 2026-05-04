@@ -15,7 +15,15 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ventas_sc_limpia_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
@@ -25,6 +33,21 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
+				},
+				{
+					"name": "derivedColumn6"
+				},
+				{
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -64,7 +87,33 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive() ~> derivedColumn2"
+				"select1 derive(fecha = coalesce(\r",
+				"toDate(fecha, 'yyyy-MM-dd'),\r",
+				"toDate(fecha, 'dd-MM-yyyy'),\r",
+				"toDate(fecha, 'MM-dd-yyyy'),\r",
+				"toDate(fecha, 'dd/MM/yyyy'),\r",
+				"toDate(fecha, 'yyyy/MM/dd'),\r",
+				"toDate(fecha, 'dd-MMM-yyyy'),\r",
+				"toDate(fecha, 'dd-MMM-yyyy'))) ~> derivedColumn2",
+				"derivedColumn2 derive(precio_unitario = toFloat(regexReplace(toString(precio_unitario), '[^0-9.]', ''))) ~> derivedColumn3",
+				"derivedColumn3 derive(cuidad_cliente = upper(left(cuidad_cliente, 1)) + lower(substring(cuidad_cliente, 2))) ~> derivedColumn4",
+				"derivedColumn4 derive(email_cliente = iif(\r",
+				"    isNull(email_cliente) || !regexMatch(trim(email_cliente), '^[^@\\\\s]+@[^@\\\\s]+\\\\.[^@\\\\s]+$'),\r",
+				"    toString(null()),\r",
+				"    lower(translate(trim(email_cliente), 'áéíóúüñÁÉÍÓÚÜÑ', 'aeiouunaeiouun'))\r",
+				")) ~> derivedColumn5",
+				"derivedColumn5 derive(precio_unitario = toInteger(precio_unitario),",
+				"          cantidad = toInteger(cantidad)) ~> derivedColumn6",
+				"derivedColumn6 filter(cantidad>0 && !isNull(precio_unitario) && !isNull(fecha)) ~> filter1",
+				"filter1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['ventas_online_limpio.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
 			]
 		}
 	}
